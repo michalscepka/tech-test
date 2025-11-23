@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Order.Model;
+using Order.Model.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,6 +99,24 @@ namespace Order.Data
                 .ToListAsync();
 
             return orders;
+        }
+
+        public async Task UpdateStatusAsync(Guid orderId, string status)
+        {
+            var trimmedStatus = status.Trim();
+            var statusEntity = await _orderContext.OrderStatus.SingleOrDefaultAsync(x => x.Name == trimmedStatus)
+                ?? throw new OrderStatusNotFoundException(trimmedStatus);
+
+            var orderIdBytes = orderId.ToByteArray();
+            var order = await _orderContext.Order
+                .Where(x => _orderContext.Database.IsInMemory()
+                        ? x.Id.SequenceEqual(orderIdBytes)
+                        : x.Id == orderIdBytes)
+                .SingleOrDefaultAsync()
+                ?? throw new OrderNotFoundException(orderId);
+
+            order.StatusId = statusEntity.Id;
+            await _orderContext.SaveChangesAsync();
         }
     }
 }

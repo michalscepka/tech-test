@@ -1,5 +1,6 @@
 ﻿using Order.Data;
 using Order.Model;
+using Order.Model.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,6 +34,29 @@ namespace Order.Service
                 throw new ArgumentException("Status is required", nameof(status));
 
             return await _orderRepository.GetByStatusAsync(status);
+        }
+
+        public async Task<Result> UpdateStatusAsync(Guid orderId, string status)
+        {
+            if (orderId == Guid.Empty)
+                return Result.Failure("Order id is required");
+
+            if (string.IsNullOrWhiteSpace(status))
+                return Result.Failure("Status is required");
+
+            try
+            {
+                await _orderRepository.UpdateStatusAsync(orderId, status);
+                return Result.Success();
+            }
+            catch (OrderStatusNotFoundException ex)
+            {
+                return Result.Failure(ex.Message);
+            }
+            catch (OrderNotFoundException ex)
+            {
+                return Result.Failure(ex.Message);
+            }
         }
     }
 }
