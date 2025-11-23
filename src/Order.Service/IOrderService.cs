@@ -10,5 +10,12 @@ namespace Order.Service
         Task<IEnumerable<OrderSummary>> GetOrdersAsync();
         
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
+
+        /// <summary>
+        /// Retrieves the collection of orders whose status name matches the supplied filter.
+        /// </summary>
+        /// <param name="status">Status name to match, e.g. "Failed".</param>
+        /// <returns>Order summaries ordered by creation date for the requested status.</returns>
+        Task<IEnumerable<OrderSummary>> GetByStatusAsync(string status);
     }
 }

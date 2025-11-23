@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Order.Service;
-using System;
-using System.Threading.Tasks;
+using Order.WebAPI.Dtos.Requests;
 
-namespace OrderService.WebAPI.Controllers
+namespace Order.WebAPI.Controllers
 {
     [ApiController]
     [Route("orders")]
@@ -39,6 +40,19 @@ namespace OrderService.WebAPI.Controllers
             {
                 return NotFound();
             }
+        }
+
+        /// <summary>
+        /// Retrieves orders whose status matches the supplied query filter.
+        /// </summary>
+        /// <param name="request">Query containing the status to filter by.</param>
+        /// <returns>HTTP 200 with the filtered orders.</returns>
+        [HttpGet("filter")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterOrder([FromQuery] FilterOrderRequest request)
+        {
+            var orders = await _orderService.GetByStatusAsync(request.Status);
+            return Ok(orders);
         }
     }
 }

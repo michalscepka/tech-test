@@ -26,5 +26,13 @@ namespace Order.Service
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
             return order;
         }
+
+        public async Task<IEnumerable<OrderSummary>> GetByStatusAsync(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+                throw new ArgumentException("Status is required", nameof(status));
+
+            return await _orderRepository.GetByStatusAsync(status);
+        }
     }
 }
