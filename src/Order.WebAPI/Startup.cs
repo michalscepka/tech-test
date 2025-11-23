@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -6,8 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Order.Data;
 using Order.Service;
+using OrderService.WebAPI;
 
-namespace OrderService.WebAPI
+namespace Order.WebAPI
 {
     public class Startup
     {
@@ -33,6 +36,9 @@ namespace OrderService.WebAPI
             services.AddScoped<IOrderRepository, OrderRepository>();
 
             services.AddControllers();
+
+            services.AddFluentValidationAutoValidation();
+            services.AddValidatorsFromAssemblyContaining<Program>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
