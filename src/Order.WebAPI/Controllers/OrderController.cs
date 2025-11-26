@@ -71,6 +71,35 @@ namespace Order.WebAPI.Controllers
             return result.IsSuccess
                 ? NoContent()
                 : NotFound(new ErrorResponse {Message = result.Error});
+        /// <summary>
+        /// Creates a new order with the specified details.
+        /// </summary>
+        /// <param name="request">Payload containing the order details and items.</param>
+        /// <returns>HTTP 201 with the created order details; HTTP 400 with error details if creation fails.</returns>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
+        {
+            var createOrderDto = new CreateOrderDto
+            {
+                ResellerId = request.ResellerId,
+                CustomerId = request.CustomerId,
+                Items = request.Products.Select(i => new CreateOrderItemDto
+                {
+                    ProductId = i.ProductId,
+                    ServiceId = i.ServiceId,
+                    Quantity = i.Quantity
+                })
+            };
+
+            var result = await _orderService.CreateOrderAsync(createOrderDto);
+
+            if (!result.IsSuccess)
+                BadRequest(new ErrorResponse { Message = result.Error });
+
+            return CreatedAtAction(nameof(GetOrderById), new { orderId = result.Value.Id }, result.Value);
+        }
         }
     }
 }

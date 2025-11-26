@@ -118,5 +118,66 @@ namespace Order.Data
             order.StatusId = statusEntity.Id;
             await _orderContext.SaveChangesAsync();
         }
+
+        public async Task<OrderDetail> CreateOrderAsync(CreateOrderDto createOrderDto)
+        {
+            var orderId = Guid.NewGuid();
+            var orderIdBytes = orderId.ToByteArray();
+
+            var createdStatus = await _orderContext.OrderStatus.FirstOrDefaultAsync(x => x.Name == "Created");
+
+            var missingProducts = createOrderDto.Items
+                .Select(x => x.ProductId)
+                .Distinct()
+                .Where(pid => !_orderContext.OrderProduct.Any(p =>
+                    _orderContext.IsInMemoryDatabase()
+                        ? p.Id.SequenceEqual(pid.ToByteArray())
+                        : p.Id == pid.ToByteArray()))
+                .ToList();
+
+            if (missingProducts.Count != 0)
+                throw new ProductNotFoundException(missingProducts);
+
+            var missingServices = createOrderDto.Items
+                .Select(x => x.ServiceId)
+                .Distinct()
+                .Where(sid => !_orderContext.OrderService.Any(s =>
+                    _orderContext.IsInMemoryDatabase()
+                        ? s.Id.SequenceEqual(sid.ToByteArray())
+                        : s.Id == sid.ToByteArray()))
+                .ToList();
+
+            if (missingServices.Count != 0)
+                throw new ServiceNotFoundException(missingServices);
+
+            var order = new Entities.Order
+            {
+                Id = orderIdBytes,
+                ResellerId = createOrderDto.ResellerId.ToByteArray(),
+                CustomerId = createOrderDto.CustomerId.ToByteArray(),
+                StatusId = createdStatus.Id,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _orderContext.Order.Add(order);
+
+            foreach (var item in createOrderDto.Items)
+            {
+                var orderItem = new Entities.OrderItem
+                {
+                    Id = Guid.NewGuid().ToByteArray(),
+                    OrderId = orderIdBytes,
+                    ProductId = item.ProductId.ToByteArray(),
+                    ServiceId = item.ServiceId.ToByteArray(),
+                    Quantity = item.Quantity
+                };
+
+                _orderContext.OrderItem.Add(orderItem);
+            }
+
+            await _orderContext.SaveChangesAsync();
+
+            return await GetOrderByIdAsync(orderId);
+        }
     }
 }

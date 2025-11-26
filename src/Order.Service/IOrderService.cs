@@ -25,5 +25,12 @@ namespace Order.Service
         /// <param name="status">Target status name.</param>
         /// <returns>Result payload describing success or the reason the update could not be applied.</returns>
         Task<Result> UpdateStatusAsync(Guid orderId, string status);
+
+        /// <summary>
+        /// Creates a new order with the provided details.
+        /// </summary>
+        /// <param name="createOrderDto">Request containing order details and items.</param>
+        /// <returns>Result containing the created order details or failure reason.</returns>
+        Task<Result<OrderDetail>> CreateOrderAsync(CreateOrderDto createOrderDto);
     }
 }

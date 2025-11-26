@@ -26,5 +26,12 @@ namespace Order.Data
         /// <exception cref="Order.Model.Exceptions.OrderNotFoundException">Thrown when the target order cannot be found.</exception>
         /// <exception cref="Order.Model.Exceptions.OrderStatusNotFoundException">Thrown when the supplied status does not exist.</exception>
         Task UpdateStatusAsync(Guid orderId, string status);
+
+        /// <summary>
+        /// Creates a new order with the provided details.
+        /// </summary>
+        /// <param name="createOrderDto">Request containing order details and items.</param>
+        /// <returns>The created order details.</returns>
+        Task<OrderDetail> CreateOrderAsync(CreateOrderDto createOrderDto);
     }
 }

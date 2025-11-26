@@ -3,6 +3,7 @@ using Order.Model;
 using Order.Model.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Order.Service
@@ -56,6 +57,33 @@ namespace Order.Service
             catch (OrderNotFoundException ex)
             {
                 return Result.Failure(ex.Message);
+            }
+        }
+
+        public async Task<Result<OrderDetail>> CreateOrderAsync(CreateOrderDto createOrderDto)
+        {
+            if (createOrderDto.ResellerId == Guid.Empty)
+                return Result<OrderDetail>.Failure("ResellerId id is required");
+
+            if (createOrderDto.CustomerId == Guid.Empty)
+                return Result<OrderDetail>.Failure("CustomerId id is required");
+
+            var itemsList = createOrderDto.Items?.ToList();
+            if (itemsList is null || itemsList.Count is 0)
+                return Result<OrderDetail>.Failure("At least one order item is required");
+
+            try
+            {
+                var order = await _orderRepository.CreateOrderAsync(createOrderDto);
+                return Result<OrderDetail>.Success(order);
+            }
+            catch (ProductNotFoundException ex)
+            {
+                return Result<OrderDetail>.Failure(ex.Message);
+            }
+            catch (ServiceNotFoundException ex)
+            {
+                return Result<OrderDetail>.Failure(ex.Message);
             }
         }
     }
