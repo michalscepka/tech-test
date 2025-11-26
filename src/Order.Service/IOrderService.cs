@@ -16,7 +16,7 @@ namespace Order.Service
         /// </summary>
         /// <param name="status">Status name to match, e.g. "Failed".</param>
         /// <returns>Order summaries ordered by creation date for the requested status.</returns>
-        Task<IEnumerable<OrderSummary>> GetByStatusAsync(string status);
+        Task<Result<IEnumerable<OrderSummary>>> GetByStatusAsync(string status);
 
         /// <summary>
         /// Updates the status of an order to the supplied status name.

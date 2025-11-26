@@ -29,12 +29,12 @@ namespace Order.Service
             return order;
         }
 
-        public async Task<IEnumerable<OrderSummary>> GetByStatusAsync(string status)
+        public async Task<Result<IEnumerable<OrderSummary>>> GetByStatusAsync(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
-                throw new ArgumentException("Status is required", nameof(status));
+                return Result<IEnumerable<OrderSummary>>.Failure("Status is required");
 
-            return await _orderRepository.GetByStatusAsync(status);
+            return Result<IEnumerable<OrderSummary>>.Success(await _orderRepository.GetByStatusAsync(status));
         }
 
         public async Task<Result> UpdateStatusAsync(Guid orderId, string status)

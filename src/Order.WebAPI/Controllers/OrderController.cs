@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Order.Model;
 using Order.Service;
 using Order.WebAPI.Dtos;
 using Order.WebAPI.Dtos.Requests;
@@ -52,8 +54,12 @@ namespace Order.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> FilterOrder([FromQuery] FilterOrderRequest request)
         {
-            var orders = await _orderService.GetByStatusAsync(request.Status);
-            return Ok(orders);
+            var result = await _orderService.GetByStatusAsync(request.Status);
+
+            if (!result.IsSuccess)
+                BadRequest(new ErrorResponse { Message = result.Error });
+
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -68,9 +74,12 @@ namespace Order.WebAPI.Controllers
         {
             var result = await _orderService.UpdateStatusAsync(request.OrderId, request.Status);
 
-            return result.IsSuccess
-                ? NoContent()
-                : NotFound(new ErrorResponse {Message = result.Error});
+            if (!result.IsSuccess)
+                return NotFound(new ErrorResponse {Message = result.Error});
+
+            return NoContent();
+        }
+
         /// <summary>
         /// Creates a new order with the specified details.
         /// </summary>
