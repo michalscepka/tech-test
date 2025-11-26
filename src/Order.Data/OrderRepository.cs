@@ -179,5 +179,32 @@ namespace Order.Data
 
             return await GetOrderByIdAsync(orderId);
         }
+
+        public async Task<IEnumerable<MonthlyProfit>> GetMonthlyProfitAsync()
+        {
+            var completedOrders = await _orderContext.Order
+                .Include(x => x.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(x => x.Status)
+                .Where(x => x.Status.Name == "Completed")
+                .ToListAsync();
+
+            var monthlyProfits = completedOrders
+                .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month })
+                .Select(g => new MonthlyProfit
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    TotalCost = g.Sum(o => o.Items.Sum(i => i.Quantity * i.Product.UnitCost) ?? 0),
+                    TotalPrice = g.Sum(o => o.Items.Sum(i => i.Quantity * i.Product.UnitPrice) ?? 0),
+                    Profit = g.Sum(o => o.Items.Sum(i => i.Quantity * (i.Product.UnitPrice - i.Product.UnitCost)) ?? 0),
+                    OrderCount = g.Count()
+                })
+                .OrderByDescending(p => p.Year)
+                .ThenByDescending(p => p.Month)
+                .ToList();
+
+            return monthlyProfits;
+        }
     }
 }

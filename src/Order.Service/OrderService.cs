@@ -86,5 +86,8 @@ namespace Order.Service
                 return Result<OrderDetail>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<IEnumerable<MonthlyProfit>>> GetMonthlyProfitAsync() =>
+            Result<IEnumerable<MonthlyProfit>>.Success(await _orderRepository.GetMonthlyProfitAsync());
     }
 }

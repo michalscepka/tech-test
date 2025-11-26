@@ -100,6 +100,21 @@ namespace Order.WebAPI.Controllers
 
             return CreatedAtAction(nameof(GetOrderById), new { orderId = result.Value.Id }, result.Value);
         }
+
+        /// <summary>
+        /// Calculates profit by month for all completed orders.
+        /// </summary>
+        /// <returns>HTTP 200 with monthly profit calculations.</returns>
+        [HttpGet("profit")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMonthlyProfit()
+        {
+            var result = await _orderService.GetMonthlyProfitAsync();
+
+            if (!result.IsSuccess)
+                return BadRequest(new ErrorResponse { Message = result.Error } );
+
+            return Ok(result.Value);
         }
     }
 }

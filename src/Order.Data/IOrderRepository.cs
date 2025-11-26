@@ -33,5 +33,11 @@ namespace Order.Data
         /// <param name="createOrderDto">Request containing order details and items.</param>
         /// <returns>The created order details.</returns>
         Task<OrderDetail> CreateOrderAsync(CreateOrderDto createOrderDto);
+
+        /// <summary>
+        /// Calculates profit by month for all completed orders.
+        /// </summary>
+        /// <returns>Collection of monthly profit calculations.</returns>
+        Task<IEnumerable<MonthlyProfit>> GetMonthlyProfitAsync();
     }
 }
